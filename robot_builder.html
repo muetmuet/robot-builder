@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Builder</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #333; background: #fff; padding: 16px; }
+  .rb-desc { font-size: 14px; color: #555; margin: 0 0 16px; line-height: 1.6; }
+  .rb-prime-box { background: #f0faf5; border-left: 3px solid #1D9E75; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #444; line-height: 1.6; display: none; }
+  .rb-canvas-wrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .rb-robot-display { background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; width: 170px; flex-shrink: 0; text-align: center; }
+  .rb-robot-label { font-size: 11px; color: #999; margin-top: 6px; }
+  .rb-panel { flex: 1; min-width: 240px; }
+  .rb-section { margin-bottom: 16px; }
+  .rb-section-title { font-size: 12px; font-weight: 600; color: #777; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .rb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rb-chip { font-size: 13px; padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .rb-chip:hover { border-color: #aaa; color: #333; }
+  .rb-chip.selected-phys { background: #EBF4FD; border-color: #378ADD; color: #1a5fa0; font-weight: 500; }
+  .rb-chip.selected-ment { background: #E8F8F2; border-color: #1D9E75; color: #0a6b4e; font-weight: 500; }
+  .rb-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+  .rb-mental-q { font-size: 13px; color: #555; margin: 0 0 10px; line-height: 1.6; }
+  .rb-done-btn { margin-top: 20px; padding: 10px 24px; background: #378ADD; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .rb-done-btn:hover { background: #2a6db5; }
+  .rb-result { margin-top: 12px; padding: 10px 14px; background: #f5f5f5; border-radius: 6px; font-size: 12px; color: #555; display: none; }
+</style>
+</head>
+<body>
+
+<p class="rb-desc" id="main-desc">Please select the features you think this robot has. You can choose as many or as few as you like.</p>
+
+<div class="rb-prime-box" id="prime-box">
+  <strong>Before you begin:</strong> This AI waiter is designed to be warm, friendly, and emotionally expressive. It can sense how customers feel and respond with care and kindness.
+</div>
+
+<div class="rb-canvas-wrap">
+  <div class="rb-robot-display">
+    <svg width="130" height="200" viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+      <rect x="45" y="8"  width="50" height="48" rx="8"  fill="#ccc" id="svg-face"      opacity="0.2"/>
+      <circle cx="60" cy="26" r="6"              fill="#ccc" id="svg-eyes1"     opacity="0.2"/>
+      <circle cx="80" cy="26" r="6"              fill="#ccc" id="svg-eyes2"     opacity="0.2"/>
+      <rect x="57" y="42" width="26" height="7"  rx="3.5" fill="#ccc" id="svg-mouth"     opacity="0.2"/>
+      <rect x="35" y="62" width="70" height="62" rx="6"  fill="#ccc" id="svg-torso"      opacity="0.2"/>
+      <rect x="14" y="64" width="19" height="52" rx="6"  fill="#ccc" id="svg-arm-l"      opacity="0.2"/>
+      <rect x="107" y="64" width="19" height="52" rx="6" fill="#ccc" id="svg-arm-r"      opacity="0.2"/>
+      <rect x="11"  y="112" width="23" height="9" rx="4" fill="#ccc" id="svg-hand-l"     opacity="0.2"/>
+      <rect x="106" y="112" width="23" height="9" rx="4" fill="#ccc" id="svg-hand-r"     opacity="0.2"/>
+      <rect x="13"  y="121" width="5" height="10" rx="2.5" fill="#ccc" id="svg-finger-l1" opacity="0.2"/>
+      <rect x="20"  y="121" width="5" height="11" rx="2.5" fill="#ccc" id="svg-finger-l2" opacity="0.2"/>
+      <rect x="27"  y="121" width="5" height="10" rx="2.5" fill="#ccc" id="svg-finger-l3" opacity="0.2"/>
+      <rect x="108" y="121" width="5" height="10" rx="2.5" fill="#ccc" id="svg-finger-r1" opacity="0.2"/>
+      <rect x="115" y="121" width="5" height="11" rx="2.5" fill="#ccc" id="svg-finger-r2" opacity="0.2"/>
+      <rect x="122" y="121" width="5" height="10" rx="2.5" fill="#ccc" id="svg-finger-r3" opacity="0.2"/>
+      <rect x="44"  y="128" width="22" height="58" rx="6" fill="#ccc" id="svg-leg-l"     opacity="0.2"/>
+      <rect x="74"  y="128" width="22" height="58" rx="6" fill="#ccc" id="svg-leg-r"     opacity="0.2"/>
+      <text x="70" y="165" text-anchor="middle" font-size="10" fill="#bbb" id="svg-empty-label">select features</text>
+    </svg>
+    <p class="rb-robot-label">your robot</p>
+  </div>
+
+  <div class="rb-panel">
+    <div class="rb-section">
+      <p class="rb-section-title">Physical features</p>
+      <div class="rb-chips" id="phys-chips"></div>
+    </div>
+    <div id="mental-section" style="display:none">
+      <hr class="rb-divider">
+      <p class="rb-section-title">Mental &amp; behavioral features</p>
+      <p class="rb-mental-q">Now, thinking about this robot's personality and inner life — which of the following do you think it has?</p>
+      <div class="rb-chips" id="ment-chips"></div>
+    </div>
+  </div>
+</div>
+
+<button class="rb-done-btn" onclick="submitData()">Done ✓</button>
+<div class="rb-result" id="result-box"></div>
+
+<script>
+const physFeatures = [
+  {id:'face',    label:'Face',      ids:['svg-face'], color:'#5DCAA5'},
+  {id:'eyes',    label:'Eye(s)',    ids:['svg-eyes1','svg-eyes2'], color:'#378ADD'},
+  {id:'mouth',   label:'Mouth',     ids:['svg-mouth'], color:'#E2745A'},
+  {id:'torso',   label:'Torso',     ids:['svg-torso'], color:'#5DCAA5'},
+  {id:'arms',    label:'Arms',      ids:['svg-arm-l','svg-arm-r'], color:'#5DCAA5'},
+  {id:'hands',   label:'Hand(s)',   ids:['svg-hand-l','svg-hand-r'], color:'#5DCAA5'},
+  {id:'fingers', label:'Finger(s)', ids:['svg-finger-l1','svg-finger-l2','svg-finger-l3','svg-finger-r1','svg-finger-r2','svg-finger-r3'], color:'#5DCAA5'},
+  {id:'legs',    label:'Leg(s)',    ids:['svg-leg-l','svg-leg-r'], color:'#5DCAA5'},
+];
+
+const mentFeatures = [
+  {id:'talks',       label:'Talks / speaks'},
+  {id:'laughs',      label:'Laughs'},
+  {id:'smiles',      label:'Smiles'},
+  {id:'frowns',      label:'Frowns'},
+  {id:'emotions',    label:'Expresses emotions'},
+  {id:'opinions',    label:'Has opinions'},
+  {id:'empathy',     label:'Feels empathy'},
+  {id:'pain',        label:'Feels pain'},
+  {id:'memory',      label:'Remembers you'},
+  {id:'personality', label:'Has a personality'},
+  {id:'voice',       label:'Has a distinct voice'},
+  {id:'humor',       label:'Has a sense of humor'},
+  {id:'curious',     label:'Shows curiosity'},
+  {id:'caring',      label:'Shows care/warmth'},
+];
+
+let physSelected = new Set();
+let mentSelected = new Set();
+
+// ─── Read condition from URL param (?condition=low or ?condition=high) ───
+const urlParams = new URLSearchParams(window.location.search);
+const condition = urlParams.get('condition') || 'low';
+
+function init() {
+  if(condition === 'high') {
+    document.getElementById('prime-box').style.display = 'block';
+    document.getElementById('mental-section').style.display = 'block';
+  }
+
+  document.getElementById('phys-chips').innerHTML = physFeatures.map(f =>
+    `<span class="rb-chip" onclick="toggleChip(this,'phys','${f.id}')">${f.label}</span>`
+  ).join('');
+  document.getElementById('ment-chips').innerHTML = mentFeatures.map(f =>
+    `<span class="rb-chip" onclick="toggleChip(this,'ment','${f.id}')">${f.label}</span>`
+  ).join('');
+}
+
+function toggleChip(el, type, id) {
+  const sel = type === 'phys' ? physSelected : mentSelected;
+  const cls = type === 'phys' ? 'selected-phys' : 'selected-ment';
+  if(sel.has(id)) { sel.delete(id); el.classList.remove(cls); }
+  else { sel.add(id); el.classList.add(cls); }
+  updateRobot();
+}
+
+function updateRobot() {
+  physFeatures.forEach(f => {
+    const active = physSelected.has(f.id);
+    f.ids.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.style.opacity = active ? '1' : '0.2';
+      el.setAttribute('fill', active ? f.color : '#ccc');
+    });
+  });
+  document.getElementById('svg-empty-label').style.display = physSelected.size === 0 ? 'block' : 'none';
+}
+
+function submitData() {
+  const physList = [...physSelected].join(',');
+  const mentList = [...mentSelected].join(',');
+  const mentScore = mentFeatures.length > 0
+    ? Math.round((mentSelected.size / mentFeatures.length) * 100)
+    : 0;
+
+  // ─── Send data to Qualtrics parent window ───────────────────────────
+  // Qualtrics picks this up via: Qualtrics.SurveyEngine.setEmbeddedData()
+  // called from the parent page's JavaScript
+  window.parent.postMessage({
+    type: 'robotBuilder',
+    physicalFeatures: physList,       // e.g. "face,eyes,mouth"
+    mentalFeatures: mentList,         // e.g. "smiles,caring"
+    physCount: physSelected.size,     // e.g. 3
+    mentCount: mentSelected.size,     // e.g. 2
+    mentScore: mentScore,             // e.g. 14  (% of mental features chosen)
+    condition: condition
+  }, '*');
+
+  // ─── Visual confirmation ─────────────────────────────────────────────
+  const box = document.getElementById('result-box');
+  box.style.display = 'block';
+  box.innerHTML =
+    '<strong>Saved!</strong> Physical: ' + (physList || 'none') +
+    (condition === 'high' ? ' | Mental: ' + (mentList || 'none') : '');
+}
+
+init();
+</script>
+</body>
+</html>
