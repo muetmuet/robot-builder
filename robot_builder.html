@@ -8,7 +8,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #333; background: #fff; padding: 16px; }
   .rb-desc { font-size: 14px; color: #555; margin: 0 0 16px; line-height: 1.6; }
-  .rb-prime-box { background: #f0faf5; border-left: 3px solid #1D9E75; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #444; line-height: 1.6; display: none; }
   .rb-canvas-wrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
   .rb-robot-display { background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; width: 170px; flex-shrink: 0; text-align: center; }
   .rb-robot-label { font-size: 11px; color: #999; margin-top: 6px; }
@@ -19,9 +18,10 @@
   .rb-chip { font-size: 13px; padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; user-select: none; }
   .rb-chip:hover { border-color: #aaa; color: #333; }
   .rb-chip.selected-phys { background: #EBF4FD; border-color: #378ADD; color: #1a5fa0; font-weight: 500; }
-  .rb-chip.selected-ment { background: #E8F8F2; border-color: #1D9E75; color: #0a6b4e; font-weight: 500; }
   .rb-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
   .rb-mental-q { font-size: 13px; color: #555; margin: 0 0 10px; line-height: 1.6; }
+  .rb-chip.selected-ment { background: #E8F8F2; border-color: #1D9E75; color: #0a6b4e; font-weight: 500; }
+
   .rb-done-btn { margin-top: 20px; padding: 10px 24px; background: #378ADD; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
   .rb-done-btn:hover { background: #2a6db5; }
   .rb-result { margin-top: 12px; padding: 10px 14px; background: #f5f5f5; border-radius: 6px; font-size: 12px; color: #555; display: none; }
@@ -29,11 +29,7 @@
 </head>
 <body>
 
-<p class="rb-desc" id="main-desc">Please select the features you think this robot has. You can choose as many or as few as you like.</p>
-
-<div class="rb-prime-box" id="prime-box">
-  <strong>Before you begin:</strong> This AI waiter is designed to be warm, friendly, and emotionally expressive. It can sense how customers feel and respond with care and kindness.
-</div>
+<p class="rb-desc">Please select the features you think this robot has. You can choose as many or as few as you like.</p>
 
 <div class="rb-canvas-wrap">
   <div class="rb-robot-display">
@@ -65,10 +61,11 @@
       <p class="rb-section-title">Physical features</p>
       <div class="rb-chips" id="phys-chips"></div>
     </div>
-    <div id="mental-section" style="display:none">
+
+    <div id="mental-section">
       <hr class="rb-divider">
       <p class="rb-section-title">Mental &amp; behavioral features</p>
-      <p class="rb-mental-q">Now, thinking about this robot's personality and inner life — which of the following do you think it has?</p>
+      <p class="rb-mental-q">Thinking about the robot waiter described earlier, I perceive the robot waiter to be:</p>
       <div class="rb-chips" id="ment-chips"></div>
     </div>
   </div>
@@ -89,40 +86,28 @@ const physFeatures = [
   {id:'legs',    label:'Leg(s)',    ids:['svg-leg-l','svg-leg-r'], color:'#5DCAA5'},
 ];
 
-const mentFeatures = [
-  {id:'talks',       label:'Talks / speaks'},
-  {id:'laughs',      label:'Laughs'},
-  {id:'smiles',      label:'Smiles'},
-  {id:'frowns',      label:'Frowns'},
-  {id:'emotions',    label:'Expresses emotions'},
-  {id:'opinions',    label:'Has opinions'},
-  {id:'empathy',     label:'Feels empathy'},
-  {id:'pain',        label:'Feels pain'},
-  {id:'memory',      label:'Remembers you'},
-  {id:'personality', label:'Has a personality'},
-  {id:'voice',       label:'Has a distinct voice'},
-  {id:'humor',       label:'Has a sense of humor'},
-  {id:'curious',     label:'Shows curiosity'},
-  {id:'caring',      label:'Shows care/warmth'},
+const mentItems = [
+  {id:'warm',        label:'Warm'},
+  {id:'friendly',    label:'Friendly'},
+  {id:'caring',      label:'Caring'},
+  {id:'considerate', label:'Considerate'},
+  {id:'competent',   label:'Competent'},
+  {id:'efficient',   label:'Efficient'},
+  {id:'reliable',    label:'Reliable'},
+  {id:'capable',     label:'Capable'},
 ];
 
 let physSelected = new Set();
 let mentSelected = new Set();
 
-// ─── Read condition from URL param (?condition=low or ?condition=high) ───
 const urlParams = new URLSearchParams(window.location.search);
 const condition = urlParams.get('condition') || 'low';
 
 function init() {
-  if(condition === 'high') {
-    document.getElementById('prime-box').style.display = 'block';
-    document.getElementById('mental-section').style.display = 'block';
-  }
-
   document.getElementById('phys-chips').innerHTML = physFeatures.map(f =>
     `<span class="rb-chip" onclick="toggleChip(this,'phys','${f.id}')">${f.label}</span>`
   ).join('');
-  document.getElementById('ment-chips').innerHTML = mentFeatures.map(f =>
+  document.getElementById('ment-chips').innerHTML = mentItems.map(f =>
     `<span class="rb-chip" onclick="toggleChip(this,'ment','${f.id}')">${f.label}</span>`
   ).join('');
 }
@@ -151,28 +136,23 @@ function updateRobot() {
 function submitData() {
   const physList = [...physSelected].join(',');
   const mentList = [...mentSelected].join(',');
-  const mentScore = mentFeatures.length > 0
-    ? Math.round((mentSelected.size / mentFeatures.length) * 100)
+  const mentScore = mentItems.length > 0
+    ? Math.round((mentSelected.size / mentItems.length) * 100)
     : 0;
 
-  // ─── Send data to Qualtrics parent window ───────────────────────────
-  // Qualtrics picks this up via: Qualtrics.SurveyEngine.setEmbeddedData()
-  // called from the parent page's JavaScript
   window.parent.postMessage({
     type: 'robotBuilder',
-    physicalFeatures: physList,       // e.g. "face,eyes,mouth"
-    mentalFeatures: mentList,         // e.g. "smiles,caring"
-    physCount: physSelected.size,     // e.g. 3
-    mentCount: mentSelected.size,     // e.g. 2
-    mentScore: mentScore,             // e.g. 14  (% of mental features chosen)
+    physicalFeatures: physList,
+    mentalFeatures: mentList,
+    physCount: physSelected.size,
+    mentCount: mentSelected.size,
+    mentScore: mentScore,
     condition: condition
   }, '*');
 
-  // ─── Visual confirmation ─────────────────────────────────────────────
   const box = document.getElementById('result-box');
   box.style.display = 'block';
-  box.innerHTML =
-    '<strong>Saved!</strong> Physical: ' + (physList || 'none') +
+  box.innerHTML = '<strong>Saved!</strong> Physical: ' + (physList || 'none') +
     (condition === 'high' ? ' | Mental: ' + (mentList || 'none') : '');
 }
 
